@@ -1,3 +1,6 @@
+from job_manager import append_event
+
+
 class CompanyResearchCrew:
     def __init__(self, job_id: str):
         self.job_id = job_id
@@ -14,10 +17,13 @@ class CompanyResearchCrew:
         if not self.crew:
             print(f"No crew found for {self.job_id}")
 
+        append_event(self.job_id, "CREW STARTED")
         try:
             print(f"Running crew for {self.job_id}")
             results = self.crew.kickoff()
+            append_event(self.job_id, "CREW COMPLETED")
             return results
         
         except Exception as e:
+            append_event(self.job_id, f"An error occured: {e}")
             return str(e)
