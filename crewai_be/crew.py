@@ -1,4 +1,5 @@
 from job_manager import append_event
+from agents import CompanyResearchAgents
 
 
 class CompanyResearchCrew:
@@ -7,9 +8,15 @@ class CompanyResearchCrew:
         self.crew = None
 
     def setup_crew(self, companies: list[str], positions: list[str]):
-        print(f"Setting up crew for {self.job_id} with companies {companies} and positions {positions}.")
+        
+        agents = CompanyResearchAgents()
 
-        # TODO: SETUP AGENTS
+        research_manager = agents.research_manager(
+            companies, positions
+        )
+        company_research_agent = agents.company_research_agent()
+
+
         # TODO: SETUP TASKS
         # TODO: CREATE CREW
 
