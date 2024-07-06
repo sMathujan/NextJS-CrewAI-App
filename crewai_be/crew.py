@@ -1,4 +1,5 @@
 from job_manager import append_event
+from langchain_openai import ChatOpenAI
 from agents import CompanyResearchAgents
 from tasks import CompanyResearchTasks
 from crewai import Crew
@@ -8,6 +9,7 @@ class CompanyResearchCrew:
     def __init__(self, job_id: str):
         self.job_id = job_id
         self.crew = None
+        self.llm = ChatOpenAI(model="gpt-4-turbo-preview")
 
     def setup_crew(self, companies: list[str], positions: list[str]):
         

@@ -1,6 +1,10 @@
 from flask import Flask, jsonify, request, abort
 from uuid import uuid4
 from threading import Thread
+from datetime import datetime
+import json
+from crew import CompanyResearchCrew
+from job_manager import append_event, jobs, jobs_lock, Event
 
 
 app = Flask(__name__)
@@ -9,11 +13,28 @@ app = Flask(__name__)
 def kickoff_crew(job_id: str, companies: list[str], positions: list[str]):
     print(f"Running crew for {job_id} with companies {companies} and positions {positions}")
 
-    # TODO: SETUP THE CREW HERE
+    # SETUP THE CREW 
+    results = None
+    try:
+        company_research_crew = CompanyResearchCrew(job_id)
+        company_research_crew.setup_crew(
+            companies, positions
+        )
+        results = company_research_crew.kickoff()
 
-    # TODO: RUN THE CREW HERE
+    except Exception as e:
+        print(f"CREW FAILED: {str(e)}")
+        append_event(job_id, f"CREW FAILED: {str(e)}")
+        with jobs_lock:
+            jobs[job_id].status = "ERROR"
+            jobs[job_id].result = str(e)
 
-    # TODO: LET APP KNOW WE ARE DONE
+    with jobs_lock:
+        jobs[job_id].status = "COMPLETE"
+        jobs[job_id].result = results
+        jobs[job_id].events.append(
+            Event(timestamp=datetime.now(), data="CREW COMPLETE")
+        )
 
 
 @app.route('/api/crew', methods=['POST'])
@@ -35,7 +56,25 @@ def run_crew():
 
 @app.route('/api/crew/<job_id>', methods=['GET'])
 def get_status(job_id):
-    return jsonify({'status': f"Getting status for {job_id}"}), 200
+
+    with jobs_lock:
+        job = jobs.get(job_id)
+        if not job:
+            abort(404, description="Job not found")
+
+    # Parse the JSON data
+    try:
+        result_json = json.loads(job.results)
+    except:
+        result_json = job.result
+
+    # Return everything
+    return jsonify({
+        'job_id': job_id,
+        'status': job.status,
+        'result': result_json,
+        'events': [{"timestamp": event.timestamp.isoformat(), "data": event.data} for event in job.events]
+    }), 200
 
 
 if __name__ == '__main__':
