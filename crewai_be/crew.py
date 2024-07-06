@@ -1,5 +1,6 @@
+import os
 from job_manager import append_event
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from agents import CompanyResearchAgents
 from tasks import CompanyResearchTasks
 from crewai import Crew
@@ -9,7 +10,10 @@ class CompanyResearchCrew:
     def __init__(self, job_id: str):
         self.job_id = job_id
         self.crew = None
-        self.llm = ChatOpenAI(model="gpt-4-turbo-preview")
+        self.llm = ChatGroq(
+            api_key=os.getenv("GROQ_API_KEY"),
+            model="mixtral-8x7b-32768"
+        )
 
     def setup_crew(self, companies: list[str], positions: list[str]):
         

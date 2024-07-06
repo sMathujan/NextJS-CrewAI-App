@@ -1,6 +1,7 @@
+import os
 from typing import List
 from crewai import Agent
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from crewai_tools import SerperDevTool
 from tools.youtube_search_tools import YoutubeVideoSearchTool
 
@@ -11,7 +12,10 @@ class CompanyResearchAgents():
     def __init__(self):
         self.searchInternetTool = SerperDevTool()
         self.youtubeSearchTool = YoutubeVideoSearchTool()
-        self.llm = ChatOpenAI(model="gpt-4-turbo-preview")
+        self.llm = ChatGroq(
+            api_key=os.getenv("GROQ_API_KEY"),
+            model="mixtral-8x7b-32768"
+        )
 
     def research_manager(self, companies: List[str], positions: List[str]) -> Agent:
         return Agent(

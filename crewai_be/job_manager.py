@@ -28,7 +28,7 @@ def append_event(job_id: str, event_data: str):
             jobs[job_id] = Job(
                 status="STARTED",
                 events=[],
-                results=""
+                result=""
             )
         else:
             print("Appending event for job")
